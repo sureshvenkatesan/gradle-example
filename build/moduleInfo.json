@@ -1,0 +1,21 @@
+{
+  "id" : "org.jfrog.example.gradle:gradle-example:1.1.2",
+  "artifacts" : [ {
+    "type" : "jar",
+    "sha1" : "b341f8f6ec6c369a772e91682a2106d58b85fc9d",
+    "md5" : "9f3cac3d374cd7a2195a60a4553d0278",
+    "name" : "gradle-example-1.1.2.jar"
+  }, {
+    "type" : "ivy",
+    "sha1" : "9c426e80eb3027c240b3d83df1153632298bc604",
+    "md5" : "2b70fb2c49aa931be2b645c8b41750cd",
+    "name" : "ivy-1.1.2.xml"
+  }, {
+    "type" : "pom",
+    "sha1" : "21ca3728ec1982919cf79d4af67e51ee3ad04e55",
+    "md5" : "a352768c977a3d6da1d28b027de1e9d9",
+    "name" : "gradle-example-1.1.2.pom"
+  } ],
+  "excludedArtifacts" : [ ],
+  "dependencies" : [ ]
+}

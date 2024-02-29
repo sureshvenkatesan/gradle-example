@@ -1,0 +1,22 @@
+items.find({
+	"$and": [
+		{
+			"$or": [
+				{
+					"$and": [
+						{
+							"dependency.module.build.name": {
+								"$eq": "gradle-example"
+							}
+						},
+						{
+							"dependency.module.build.number": {
+								"$eq": "4"
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}).include("sha256","updated","modified_by","created","id","original_md5","depth","actual_sha1","property.value","modified","property.key","actual_md5","created_by","type","name","repo","original_sha1","size","path")

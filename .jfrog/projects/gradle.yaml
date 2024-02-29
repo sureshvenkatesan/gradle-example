@@ -1,0 +1,12 @@
+version: 1
+type: gradle
+resolver:
+  repo: sdx-app-gradle-virtual
+  serverId: artifactory-eu
+deployer:
+  repo: sdx-app-gradle-virtual
+  serverId: artifactory-eu
+  deployMavenDescriptors: true
+  deployIvyDescriptors: true
+  ivyPattern: '[organization]/[module]/ivy-[revision].xml'
+  artifactPattern: '[organization]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]'
