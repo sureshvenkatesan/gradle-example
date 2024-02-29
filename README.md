@@ -1,38 +1,101 @@
-## Create an application war file
 
-• Creates a sample application called ‘webservice-1.1.2.war’
-• Pushes it to a local repository in Artifactory
+On mac pull the master branch and do the following:
+cd to the working folder i.e gradle-example
 
-### Step to create Jenkins Pipeline:
-<b>Note:</b> List of required Jenkins plugins
-*   [Artifactory Plugin](https://wiki.jenkins.io/display/JENKINS/Artifactory+Plugin)   
-*   [Docker Pipeline Plugin](https://wiki.jenkins.io/display/JENKINS/Docker+Pipeline+Plugin)   
-*   [GitHub plugin](https://plugins.jenkins.io/git)   
-*   [Pipeline Github Plugin](https://wiki.jenkins.io/display/JENKINS/Pipeline+Github+Plugin)   
-*   [Pipeline Plugin](https://wiki.jenkins.io/display/JENKINS/Pipeline+Plugin)   
-*   [Gradle Plugin](https://wiki.jenkins.io/display/JENKINS/Gradle+Plugin)   
+I did cd ~/myCode/github-sv/gradle-example
 
-1.  Configure Artifactory server in Jenkins Manage Jenkins -> Configure System -> Artifactory -> Add Artifactory Server.  
-    ![Add_Artifactory_Server](../images/Add_Artifactory_Server.png)
+rm -rf .gradle
 
-2.  Create Gradle repositories in Artifactory using [quick setup wizard](https://www.jfrog.com/confluence/display/RTF/Getting+Started#GettingStarted-OnboardingWizard).       
+Remove the dependencies already cached:
+```
+rm -rf ~/.gradle/caches/*
+```
+Remove all .jar and .class files in a directory and its subdirectories
+```
+find . -type f \( -name "*.jar" -o -name "*.class" \) -delete
 
-3.  Create new Jenkins Pipeline Job.
+```
+Configure the jfrog cli to use your artifactory instance.
 
-4.  Add String Parameters:
-    *   GRADLE_TOOL (String Parameter) : Provide name of configured Gradle installation 
-		e.g `GRADLE_TOOL : gradle-3.5.1`
-    *   DEPLOY_REPO (String Parameter) -> Artifactory Gradle Repository name<Br>
-		e.g.  `DEPLOY_REPO -> gradle-release`
-    *   SERVER_ID (String Parameter) : Artifactory Server Id<Br>
-	    e.g. `SERVER_ID -> artifactory`
-    *   XRAY_SCAN (Choice Parameter) : Xray Scan. Applicable only if you are using JFrog Xray<Br>
-    	e.g. `XRAY_SCAN -> NO`
-    *   CLEAN_REPO (Choice Parameter) : Clean gradle cache before building project<Br>
-    	e.g. `CLEAN_REPO -> YES`
-    	
-5.  Copy [Jenkinsfile](Jenkinsfile) to Pipeline Script.
+jfrog rt c psazuse --url=https://psazuse.jfrog.io/artifactory --user=admin --password=your-password
 
-6.  To build it, press Build Now.
+jf rt use psazuse
 
-7.  Check your newly published build in build browser of Artifactory. # gradle-example
+Create the repos need for the lab:
+```
+jf rt curl  -X PUT api/repositories/sdx-app-ext-libs-local -H "Content-Type: application/json" -T sdx-app-ext-libs-local.json --server-id=psazuse
+jf rt curl  -X PUT api/repositories/sdx-app-gradle-dev-local -H "Content-Type: application/json" -T sdx-app-gradle-dev-local.json --server-id=psazuse
+jf rt curl  -X PUT api/repositories/sdx-app-gradle-rc-local -H "Content-Type: application/json" -T sdx-app-gradle-rc-local.json --server-id=psazuse
+jf rt curl  -X PUT api/repositories/sdx-app-gradle-release-local -H "Content-Type: application/json" -T sdx-app-gradle-release-local.json --server-id=psazuse
+
+jf rt curl  -X PUT api/repositories/sdx-app-gradle-remote -H "Content-Type: application/json" -T sdx-app-gradle-remote.json --server-id=psazuse
+
+jf rt curl  -X PUT api/repositories/sdx-app-gradle-virtual -H "Content-Type: application/json" -T sdx-app-gradle-virtual.json --server-id=psazuse
+```
+
+Do the Gradle config:
+```
+jf  gradlec --server-id-resolve=psazuse --server-id-deploy=psazuse --repo-resolve=sdx-app-gradle-virtual --repo-deploy=sdx-app-gradle-virtual
+```
+
+Note: This creates the config file in ./.jfrog/projects/gradle.yaml with below content:
+```
+version: 1
+type: gradle
+resolver:
+    repo: sdx-app-gradle-virtual
+    serverId: psazuse
+deployer:
+    repo: sdx-app-gradle-virtual
+    serverId: psazuse
+    deployMavenDescriptors: true
+    deployIvyDescriptors: true
+    ivyPattern: '[organization]/[module]/ivy-[revision].xml'
+    artifactPattern: '[organization]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]'
+
+```
+
+Create the build to be indexed by xray:
+```
+jf xr curl -XPOST api/v1/binMgr/builds -H 'content-type:application/json' -d '{"names": ["sdx-app-gradle-build"]}' --server-id psazuse
+```
+Create the Xry watches and policies
+```
+jf xr curl -XPOST -H "Content-Type: application/json" api/v2/policies -T sdx-security-policy.json --server-id psazuse
+jf xr curl -XPOST -H "Content-Type: application/json" api/v2/watches -T sdx-watch.json --server-id psazuse 
+```
+
+Gradle build
+jf gradle clean artifactoryPublish -b ./build.gradle --build-name=sdx-app-gradle-build --build-number=4
+
+Collecting environments variables : 
+jf rt bce sdx-app-gradle-build 4
+
+Gradle Build publish
+jf rt bp sdx-app-gradle-build 4
+
+Gradle build scan
+jf rt bs sdx-app-gradle-build 7
+
+Gradle build promotion
+with dependencies
+jf rt bpr sdx-app-gradle-build 5 sdx-app-gradle-rc-local --status="Security Scan Passed" --comment="No vulnerabilities" --include-dependencies="true"
+
+without dependencies
+jf rt bpr sdx-app-gradle-build 7 sdx-app-gradle-rc-local --status="Security Scan Passed" --comment="No vulnerabilities" 
+Update security policy
+
+Run a new build
+Run a scan
+promote to quarantine (without dependencies)
+jf rt bpr sdx-app-gradle-build 4 sdx-app-quarantine-local --status="Security Quarantine" --comment="Vulnerabilities found at build time" 
+
+Release promotion : 
+With dependencies
+jf rt bpr sdx-app-gradle-build 5 sdx-app-gradle-release-local --status="Released" --comment="prod-ready" --include-dependencies="true"
+
+Without dependencies : 
+jf rt bpr sdx-app-gradle-build 7 sdx-app-gradle-release-local --status="Released" --comment="prod-ready"
+
+If promoting with dependencies, then promoting separately via a copy + filespec
+jf rt cp --spec="./filespec-aql.json" --spec-vars="sdx-build-name=sdx-app-gradle-build;sdx-build-number=7;sdx-target-repo=sdx-app-ext-libs-local"

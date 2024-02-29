@@ -1,0 +1,57 @@
+{
+  "general_data": {
+    "id": "90c90ba7af9cb3e485f5d409",
+    "name": "sdx-watch",
+    "active": true
+  },
+  "project_resources": {
+    "resources": [
+      {
+        "type": "build",
+        "name": "sdx-app-gradle-build",
+        "bin_mgr_id": "default",
+        "build_repo": "builds"
+      },
+      {
+        "type": "repository",
+        "name": "sdx-app-gradle-dev-local",
+        "bin_mgr_id": "default",
+        "repo_type": "local"
+      },
+      {
+        "type": "repository",
+        "name": "sdx-app-gradle-rc-local",
+        "bin_mgr_id": "default",
+        "repo_type": "local"
+      },
+      {
+        "type": "repository",
+        "name": "sdx-app-gradle-release-local",
+        "bin_mgr_id": "default",
+        "repo_type": "local"
+      },
+      {
+        "type": "repository",
+        "name": "sdx-app-gradle-remote",
+        "bin_mgr_id": "default",
+        "repo_type": "remote"
+      }
+    ]
+  },
+  "assigned_policies": [
+    {
+      "name": "sdx-security-policy",
+      "type": "security"
+    }
+  ],
+  "ticket_generation": {
+    "create_duplicate_tickets": {
+      "by_version": {
+        "build": false,
+        "package": false,
+        "release_bundle": false
+      }
+    },
+    "impact_path_profiles_mapping": {}
+  }
+}

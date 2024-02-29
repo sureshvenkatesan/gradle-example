@@ -1,0 +1,29 @@
+{
+  "name": "sdx-security-policy",
+  "type": "security",
+  "author": "sureshv@jfrog.com",
+  "rules": [
+    {
+      "name": "critical",
+      "priority": 1,
+      "actions": {
+        "fail_build": true,
+        "block_download": {
+          "unscanned": false,
+          "active": false
+        }
+      },
+      "criteria": {
+        "applicable_cves_only": false,
+        "cvss_range": {
+          "from": 8,
+          "to": 10
+        },
+        "fix_version_dependant": false,
+        "malicious_package": false
+      }
+    }
+  ],
+  "created": "2024-02-25T04:30:18.724Z",
+  "modified": "2024-02-25T04:44:56.041Z"
+}
