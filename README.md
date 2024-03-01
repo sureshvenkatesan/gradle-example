@@ -1,3 +1,5 @@
+## Gradle build , Xray Scan,  promote , Save dependencies for future builds , quarantine builds
+
 This Lab explains how to :
 a) publish a gradle build to DEV repo sdx-app-gradle-dev-local by resolving dependencies from remote repo sdx-app-gradle-remote
 b) then promote the build to release candidate repo sdx-app-gradle-rc-local
