@@ -132,20 +132,22 @@ Assume there were no violations in the scan , then you can promote the build.
 ### Gradle build promotion .
 In the demo do the promotion without dependencies ( this is the default i.e --include-dependencies="false")
 ```
-jf rt bpr sdx-app-gradle-build 4 sdx-app-gradle-rc-local --status="Security Scan Passed" --comment="No vulnerabilities" 
+jf rt bpr sdx-app-gradle-build 4 sdx-app-gradle-rc-local --status="Security Scan Passed" --comment="No vulnerabilities" --server-id psazuse 
 ```
+Note: Build promotion will move the deployed artifacts from `sdx-app-gradle-dev-local`  to the target `sdx-app-gradle-rc-local`
+
 Now show the "Release History" of this build to show that the "Security Scan Passed".
 
 Note: Another option is with dependencies ( not demoing this)
 ```
-jf rt bpr sdx-app-gradle-build 4 sdx-app-gradle-rc-local --status="Security Scan Passed" --comment="No vulnerabilities" --include-dependencies="true"
+jf rt bpr sdx-app-gradle-build 4 sdx-app-gradle-rc-local --status="Security Scan Passed" --comment="No vulnerabilities" --include-dependencies="true" --server-id psazuse 
 ```
 
 Now run some QA , regression tests etc and promote to release without the dependencies.
 
 Release promotion : Without dependencies : 
 ```
-jf rt bpr sdx-app-gradle-build 4 sdx-app-gradle-release-local --status="Released" --comment="prod-ready"
+jf rt bpr sdx-app-gradle-build 4 sdx-app-gradle-release-local --status="Released" --comment="prod-ready" --server-id psazuse 
 ```
 Show the "Release History" of this build.
 
@@ -156,7 +158,7 @@ Show the filespec-aql.json .
 
 If promoting with dependencies, then promoting separately via a copy + filespec
 ```
-jf rt cp --spec="./filespec-aql.json" --spec-vars="sdx-build-name=sdx-app-gradle-build;sdx-build-number=4;sdx-target-repo=sdx-app-ext-libs-local"
+jf rt cp --spec="./filespec-aql.json" --spec-vars="sdx-build-name=sdx-app-gradle-build;sdx-build-number=4;sdx-target-repo=sdx-app-ext-libs-local" --server-id psazuse 
 ```
 It searches the depndencies and copies them  ( not move) from the remote repo cache to the sdx-app-ext-libs-local repo.
 
@@ -184,7 +186,7 @@ jf rt bp sdx-app-gradle-build 5
 
 Now promote With dependencies:
 ```
-jf rt bpr sdx-app-gradle-build 5 sdx-app-gradle-release-local --status="Released" --comment="prod-ready" --include-dependencies="true"
+jf rt bpr sdx-app-gradle-build 5 sdx-app-gradle-release-local --status="Released" --comment="prod-ready" --include-dependencies="true" --server-id psazuse 
 ```
 
 Show the build 5 is  "Released" ( as seen in the status) and the dependencies are now in the `sdx-app-gradle-release-local` repo alongside my  actual app i.e org.jfrog. ...
